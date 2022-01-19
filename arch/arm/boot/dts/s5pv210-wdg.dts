@@ -58,6 +58,10 @@
 	};
 };
 
+&xxti {
+	clock-frequency = <24000000>;
+};
+
 &xusbxti {
 	clock-frequency = <24000000>;
 };
