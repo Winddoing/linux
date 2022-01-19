@@ -20,8 +20,8 @@
 #include "s5pv210.dtsi"
 
 / {
-	model = "YIC System SMDKV210 based on S5PV210";
-	compatible = "yic,smdkv210", "samsung,s5pv210";
+	model = "YIC System WDG based on S5PV210";
+	compatible = "yic,wdg", "samsung,s5pv210";
 
 	chosen {
 		bootargs = "console=ttySAC0,115200n8 root=/dev/mmcblk0p1 rw rootwait ignore_loglevel earlyprintk";
@@ -29,7 +29,7 @@
 
 	memory@20000000 {
 		device_type = "memory";
-		reg = <0x20000000 0x40000000>;
+		reg = <0x20000000 0x10000000>;
 	};
 
 	pmic_ap_clk: clock-0 {
