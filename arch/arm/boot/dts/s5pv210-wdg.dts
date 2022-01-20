@@ -40,12 +40,16 @@
 	};
 
 	ethernet@a8000000 {
-		compatible = "davicom,dm9000";
-		reg = <0xA8000000 0x2 0xA8000002 0x2>;
+		compatible = "smsc,lan9115";
+		reg = <0xA8000000 0x10000>;
+		phy-mode = "mii";
 		interrupt-parent = <&gph1>;
-		interrupts = <1 IRQ_TYPE_LEVEL_HIGH>;
+		interrupts = <1 IRQ_TYPE_LEVEL_LOW>;
+		clocks = <&clocks CLK_SROMC>;
 		local-mac-address = [00 00 de ad be ef];
-		davicom,no-eeprom;
+		reg-io-width = <2>;
+		smsc,force-internal-phy;
+		smsc,irq-push-pull;
 	};
 
 	backlight {
