@@ -41,16 +41,46 @@ save_defconfig() {
 burn_kernel() {
 	echo "Burn kernel"
 	local sd_dev="/dev/sda"
+	local zImage="arch/arm/boot/zImage"
+	local wdg_dtb="arch/arm/boot/dts/s5pv210-wdg.dtb"
+	local boot_mode="$1"
 
 	if [ ! -b $sd_dev ]; then
 		echo "SD dev($sd_dev) does not exist"
 		exit 255
 	fi
 
-	set -x
-	sudo dd if=$spl_bin of=$sd_dev bs=512 seek=1
-	sudo dd if=$uboot_bin of=$sd_dev bs=512 seek=49
+	if [ ! -f $zImage ] && [ ! -f $wdg_dtb ]; then
+		echo "zImage or dtb file not generated"
+		exit 255
+	fi
 
+	echo "MMC boot mode: $boot_mode"
+	case $boot_mode in
+		mmcfatboot)
+			set -x
+			local vfat_boot="boot.fat"
+			sudo dd if=/dev/zero of=${vfat_boot} bs=1M count=8
+			sudo mkfs.fat ${vfat_boot}
+			sudo mount -o loop ${vfat_boot} /mnt/
+			sudo cp $zImage $wdg_dtb /mnt/
+			sudo umount /mnt
+			sudo dd if=boot.fat of=$sd_dev bs=512 seek=4096
+			set +x
+			;;
+		mmcrawboot)
+			set -x
+			sudo dd if=$zImage of=$sd_dev bs=512 seek=4096		#0x1000
+			sudo dd if=$wdg_dtb of=$sd_dev bs=512 seek=18432	#0x4800
+			set +x
+			;;
+		*)
+			echo "	Boot mode supported by mmc: \"mmcfatboot\", \"mmcfatboot\*"
+			exit 3
+			;;
+	esac
+
+	set -x
 	sync
 	set +x
 }
@@ -94,7 +124,7 @@ case $1 in
 		make_kernel
 		;;
 	b|burn)
-		burn_kernel
+		burn_kernel $2
 		;;
 	*)
 		make_kernel
