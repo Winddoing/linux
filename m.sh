@@ -57,6 +57,12 @@ burn_kernel() {
 		exit 255
 	fi
 
+	sudo fdisk $sd_dev -l | grep "SD" > /dev/null
+	if [ $? -ne 0 ]; then
+		echo "the current device($sd_dev) is not an SD card"
+		exit 255
+	fi
+
 	echo "MMC boot mode: $boot_mode"
 	case $boot_mode in
 		mmcfatboot)
@@ -82,8 +88,10 @@ burn_kernel() {
 			set +x
 			;;
 		*)
-			echo "	Boot mode supported by mmc: \"mmcfatboot\", \"mmcfatboot\", \"mmcfitboot\""
-			exit 3
+			echo "Default boot mmcfitboot"
+			set -x
+			sudo dd if=$UIMAGE_ITB_FILE of=$sd_dev bs=512 seek=4096  #0x1000
+			set +x
 			;;
 	esac
 
@@ -113,6 +121,8 @@ cat << EOF
 		c|config    make menuconfig
 		m|make      Build kernel
 		b|burn      Burn dts & kernel to SD
+                    Boot mode supported by mmc:
+                "mmcfatboot", "mmcfatboot", "mmcfitboot(default)"
 EOF
 }
 
