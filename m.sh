@@ -10,6 +10,8 @@
 export ARCH=arm
 export CROSS_COMPILE=arm-none-eabi-
 
+BURN_SD_DEV="/dev/sda"
+
 UBOOT_DIR="../uboot"
 KERNEL_FIT_ITS="wdg_boot.its"
 UIMAGE_ITB_FILE="boot.itb"
@@ -43,12 +45,11 @@ save_defconfig() {
 
 burn_kernel() {
 	echo "Burn kernel"
-	local sd_dev="/dev/sda"
 	local zImage="arch/arm/boot/zImage"
 	local boot_mode="$1"
 
-	if [ ! -b $sd_dev ]; then
-		echo "SD dev($sd_dev) does not exist"
+	if [ ! -b $BURN_SD_DEV ]; then
+		echo "SD dev($BURN_SD_DEV) does not exist"
 		exit 255
 	fi
 
@@ -57,9 +58,9 @@ burn_kernel() {
 		exit 255
 	fi
 
-	sudo fdisk $sd_dev -l | grep "SD" > /dev/null
+	sudo fdisk $BURN_SD_DEV -l | grep "SD" > /dev/null
 	if [ $? -ne 0 ]; then
-		echo "the current device($sd_dev) is not an SD card"
+		echo "the current device($BURN_SD_DEV) is not an SD card"
 		exit 255
 	fi
 
@@ -73,24 +74,24 @@ burn_kernel() {
 			sudo mount -o loop ${vfat_boot} /mnt/
 			sudo cp $zImage $WDG_DTB /mnt/
 			sudo umount /mnt
-			sudo dd if=boot.fat of=$sd_dev bs=512 seek=4096	   #0x1000
+			sudo dd if=boot.fat of=$BURN_SD_DEV bs=512 seek=4096	   #0x1000
 			set +x
 			;;
 		mmcrawboot)
 			set -x
-			sudo dd if=$zImage of=$sd_dev bs=512 seek=4096		#0x1000
-			sudo dd if=$WDG_DTB of=$sd_dev bs=512 seek=18432	#0x4800
+			sudo dd if=$zImage of=$BURN_SD_DEV bs=512 seek=4096		#0x1000
+			sudo dd if=$WDG_DTB of=$BURN_SD_DEV bs=512 seek=18432	#0x4800
 			set +x
 			;;
 		mmcfitboot)
 			set -x
-			sudo dd if=$UIMAGE_ITB_FILE of=$sd_dev bs=512 seek=4096  #0x1000
+			sudo dd if=$UIMAGE_ITB_FILE of=$BURN_SD_DEV bs=512 seek=4096  #0x1000
 			set +x
 			;;
 		*)
 			echo "Default boot mmcfitboot"
 			set -x
-			sudo dd if=$UIMAGE_ITB_FILE of=$sd_dev bs=512 seek=4096  #0x1000
+			sudo dd if=$UIMAGE_ITB_FILE of=$BURN_SD_DEV bs=512 seek=4096  #0x1000
 			set +x
 			;;
 	esac
