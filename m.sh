@@ -10,6 +10,12 @@
 export ARCH=arm
 export CROSS_COMPILE=arm-none-eabi-
 
+UBOOT_DIR="../uboot"
+KERNEL_FIT_ITS="wdg_boot.its"
+UIMAGE_ITB_FILE="boot.itb"
+
+WDG_DTB="arch/arm/boot/dts/s5pv210-wdg.dtb"
+
 make_kernel() {
 	echo "Build kernel"
 	set -x
@@ -19,11 +25,8 @@ make_kernel() {
 	make s5pv210_wdg_defconfig
 	make -j`nproc`
 
-	#make uImage LOADADDR=0x20008000
-	cp arch/arm/boot/uImage ~/tftprootfs
-
-	cp arch/arm/boot/dts/s5pv210-wdg.dtb ~/tftprootfs
-	cp arch/arm/boot/zImage ~/tftprootfs
+	${UBOOT_DIR}/tools/mkimage -f $KERNEL_FIT_ITS $UIMAGE_ITB_FILE
+	cp $UIMAGE_ITB_FILE ~/tftprootfs
 
 	set +x
 }
@@ -42,7 +45,6 @@ burn_kernel() {
 	echo "Burn kernel"
 	local sd_dev="/dev/sda"
 	local zImage="arch/arm/boot/zImage"
-	local wdg_dtb="arch/arm/boot/dts/s5pv210-wdg.dtb"
 	local boot_mode="$1"
 
 	if [ ! -b $sd_dev ]; then
@@ -50,7 +52,7 @@ burn_kernel() {
 		exit 255
 	fi
 
-	if [ ! -f $zImage ] && [ ! -f $wdg_dtb ]; then
+	if [ ! -f $zImage ] && [ ! -f $WDG_DTB ]; then
 		echo "zImage or dtb file not generated"
 		exit 255
 	fi
@@ -63,7 +65,7 @@ burn_kernel() {
 			sudo dd if=/dev/zero of=${vfat_boot} bs=1M count=8
 			sudo mkfs.fat ${vfat_boot}
 			sudo mount -o loop ${vfat_boot} /mnt/
-			sudo cp $zImage $wdg_dtb /mnt/
+			sudo cp $zImage $WDG_DTB /mnt/
 			sudo umount /mnt
 			sudo dd if=boot.fat of=$sd_dev bs=512 seek=4096	   #0x1000
 			set +x
@@ -71,15 +73,12 @@ burn_kernel() {
 		mmcrawboot)
 			set -x
 			sudo dd if=$zImage of=$sd_dev bs=512 seek=4096		#0x1000
-			sudo dd if=$wdg_dtb of=$sd_dev bs=512 seek=18432	#0x4800
+			sudo dd if=$WDG_DTB of=$sd_dev bs=512 seek=18432	#0x4800
 			set +x
 			;;
 		mmcfitboot)
-			local uboot_dir="../uboot"
-			local uimage_itb_file="boot.itb"
 			set -x
-			${uboot_dir}/tools/mkimage -f wdg_boot.its $uimage_itb_file
-			sudo dd if=$uimage_itb_file of=$sd_dev bs=512 seek=4096  #0x1000
+			sudo dd if=$UIMAGE_ITB_FILE of=$sd_dev bs=512 seek=4096  #0x1000
 			set +x
 			;;
 		*)
