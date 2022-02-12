@@ -19,7 +19,7 @@ make_kernel() {
 	make s5pv210_wdg_defconfig
 	make -j`nproc`
 
-	make uImage LOADADDR=0x20008000
+	#make uImage LOADADDR=0x20008000
 	cp arch/arm/boot/uImage ~/tftprootfs
 
 	cp arch/arm/boot/dts/s5pv210-wdg.dtb ~/tftprootfs
@@ -58,14 +58,14 @@ burn_kernel() {
 	echo "MMC boot mode: $boot_mode"
 	case $boot_mode in
 		mmcfatboot)
-			set -x
 			local vfat_boot="boot.fat"
+			set -x
 			sudo dd if=/dev/zero of=${vfat_boot} bs=1M count=8
 			sudo mkfs.fat ${vfat_boot}
 			sudo mount -o loop ${vfat_boot} /mnt/
 			sudo cp $zImage $wdg_dtb /mnt/
 			sudo umount /mnt
-			sudo dd if=boot.fat of=$sd_dev bs=512 seek=4096
+			sudo dd if=boot.fat of=$sd_dev bs=512 seek=4096	   #0x1000
 			set +x
 			;;
 		mmcrawboot)
@@ -74,8 +74,16 @@ burn_kernel() {
 			sudo dd if=$wdg_dtb of=$sd_dev bs=512 seek=18432	#0x4800
 			set +x
 			;;
+		mmcfitboot)
+			local uboot_dir="../uboot"
+			local uimage_itb_file="boot.itb"
+			set -x
+			${uboot_dir}/tools/mkimage -f wdg_boot.its $uimage_itb_file
+			sudo dd if=$uimage_itb_file of=$sd_dev bs=512 seek=4096  #0x1000
+			set +x
+			;;
 		*)
-			echo "	Boot mode supported by mmc: \"mmcfatboot\", \"mmcfatboot\*"
+			echo "	Boot mode supported by mmc: \"mmcfatboot\", \"mmcfatboot\", \"mmcfitboot\""
 			exit 3
 			;;
 	esac
