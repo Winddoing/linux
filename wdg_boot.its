@@ -5,19 +5,19 @@
 /dts-v1/;
 
 / {
-	description = "Simple image with single Linux kernel and FDT blob";
+	description = "u-boot uImage source file for s5pv210 wdg";
 	#address-cells = <1>;
 
 	images {
 		kernel {
-			description = "Vanilla Linux kernel";
-			data = /incbin/("./vmlinux.bin.gz");
+			description = "s5pv210 wdg Linux kernel";
+			data = /incbin/("./arch/arm/boot/zImage");
 			type = "kernel";
-			arch = "ppc";
+			arch = "arm";
 			os = "linux";
-			compression = "gzip";
-			load = <00000000>;
-			entry = <00000000>;
+			compression = "none";
+			load = <0x20000000>;
+			entry = <0x20000000>;
 			hash-1 {
 				algo = "crc32";
 			};
@@ -26,10 +26,10 @@
 			};
 		};
 		fdt-1 {
-			description = "Flattened Device Tree blob";
-			data = /incbin/("./target.dtb");
+			description = "Flattened Device Tree for s5pv210 wdg";
+			data = /incbin/("./arch/arm/boot/dts/s5pv210-wdg.dtb");
 			type = "flat_dt";
-			arch = "ppc";
+			arch = "arm";
 			compression = "none";
 			hash-1 {
 				algo = "crc32";
@@ -43,7 +43,7 @@
 	configurations {
 		default = "conf-1";
 		conf-1 {
-			description = "Boot Linux kernel with FDT blob";
+			description = "Boot Linux kernel with FDT blob for s5pv210 wdg";
 			kernel = "kernel";
 			fdt = "fdt-1";
 		};
