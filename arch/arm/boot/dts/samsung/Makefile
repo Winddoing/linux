@@ -54,4 +54,5 @@ dtb-$(CONFIG_ARCH_S5PV210) += \
 	s5pv210-goni.dtb \
 	s5pv210-smdkc110.dtb \
 	s5pv210-smdkv210.dtb \
-	s5pv210-torbreck.dtb
+	s5pv210-torbreck.dtb \
+	s5pv210-wdg.dtb
