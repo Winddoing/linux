@@ -5,7 +5,7 @@
 # Created Time	: 2022年01月18日 星期二 19时52分13秒
 # Description	:
 ##########################################################
-
+set -eo pipefail
 
 export ARCH=arm
 export CROSS_COMPILE=arm-none-eabi-
@@ -16,7 +16,7 @@ UBOOT_DIR="../uboot"
 KERNEL_FIT_ITS="wdg_boot.its"
 UIMAGE_ITB_FILE="boot.itb"
 
-WDG_DTB="arch/arm/boot/dts/s5pv210-wdg.dtb"
+WDG_DTB="arch/arm/boot/dts/samsung/s5pv210-wdg.dtb"
 
 make_kernel() {
 	echo "Build kernel"
@@ -109,6 +109,17 @@ make_config()
 	make menuconfig
 }
 
+distclean()
+{
+	echo "Clean"
+
+	set -x
+	make mrproper
+	make clean
+	make distclean
+	set +x
+}
+
 usage() {
 cat << EOF
 	*** No parameters for compiling kernel ***
@@ -117,11 +128,12 @@ cat << EOF
 	  $0 <option>
 
 	option:
-		h|help      Help
-		s|save      Save current config
-		c|config    make menuconfig
-		m|make      Build kernel
-		b|burn      Burn dts & kernel to SD
+		h|help		Help
+		s|save		Save current config
+		c|config	make menuconfig
+		d|distclean	Build kernel
+		m|make		Build kernel
+		b|burn		Burn dts & kernel to SD
                     Boot mode supported by mmc:
                 "mmcfatboot", "mmcfatboot", "mmcfitboot(default)"
 EOF
@@ -137,6 +149,9 @@ case $1 in
 		;;
 	s|save)
 		save_defconfig
+		;;
+	d|distclean)
+		distclean
 		;;
 	m|make)
 		make_kernel
