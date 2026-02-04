@@ -114,7 +114,7 @@ distclean()
 	echo "Clean"
 
 	set -x
-	make mrproper
+	#make mrproper
 	make clean
 	make distclean
 	set +x
