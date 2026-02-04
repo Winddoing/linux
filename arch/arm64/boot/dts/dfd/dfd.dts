@@ -1,0 +1,186 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+
+#include <dt-bindings/interrupt-controller/arm-gic.h>
+
+/dts-v1/;
+/ {
+	compatible = "dfd-qemu";
+	model = "Dfd Qemu";
+
+	interrupt-parent = <&gic>;
+	#address-cells = <2>;
+	#size-cells = <2>;
+
+	chosen {
+		/*
+		* enable early printk
+		* "earlycon" or "earlycon=pl011,mmio32,0xf1800000"
+		*
+		* Do not unregister boot console at start. 一直使用早期printk
+		* "keep_bootcon"
+		*/
+		//bootargs = "earlycon=pl011,mmio32,0xf1800000 console=ttyAMA0,115200n8 rootwait root=/dev/mmcblk0p2 rootfstype=ext4 rw";
+		bootargs = "earlycon=pl011,mmio32,0xf1800000 console=ttyAMA0,115200n8 rootwait";
+		stdout-path = "serial0:115200n8";
+	};
+
+	aliases {
+		serial0 = &uart0;
+	};
+
+	memory@0 {
+		device_type = "memory";
+		reg = <0x0 0x00000000 0x0 0x80000000>;
+		status = "okay";
+	};
+
+	cpus {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		cpu-map {
+			cluster0: cluster0 {
+				core0 {
+					cpu = <&cpu0>;
+				};
+
+				core1 {
+					cpu = <&cpu1>;
+				};
+
+				core2 {
+					cpu = <&cpu2>;
+				};
+
+				core3 {
+					cpu = <&cpu3>;
+				};
+			};
+		};
+
+		cpu0: cpu@0 {
+			device_type = "cpu";
+			compatible = "arm,cortex-a53";
+			reg = <0x0>;
+			enable-method = "spin-table";
+			cpu-release-addr = <0>;
+			i-cache-size = <0x8000>;
+			i-cache-line-size = <64>;
+			i-cache-sets = <256>;
+			d-cache-size = <0x8000>;
+			d-cache-line-size = <64>;
+			d-cache-sets = <128>;
+			next-level-cache = <&L2>;
+			//clock-names = "pll0", "cpu_clk", "bus_clk";
+		};
+
+		cpu1: cpu@1 {
+			device_type = "cpu";
+			compatible = "arm,cortex-a53";
+			reg = <0x1>;
+			enable-method = "spin-table";
+			cpu-release-addr = <0>;
+			i-cache-size = <0x8000>;
+			i-cache-line-size = <64>;
+			i-cache-sets = <256>;
+			d-cache-size = <0x8000>;
+			d-cache-line-size = <64>;
+			d-cache-sets = <128>;
+			next-level-cache = <&L2>;
+		};
+
+		cpu2: cpu@2 {
+			device_type = "cpu";
+			compatible = "arm,cortex-a53";
+			reg = <0x2>;
+			enable-method = "spin-table";
+			cpu-release-addr = <0>;
+			i-cache-size = <0x8000>;
+			i-cache-line-size = <64>;
+			i-cache-sets = <256>;
+			d-cache-size = <0x8000>;
+			d-cache-line-size = <64>;
+			d-cache-sets = <128>;
+			next-level-cache = <&L2>;
+		};
+
+		cpu3: cpu@3 {
+			device_type = "cpu";
+			compatible = "arm,cortex-a53";
+			reg = <0x3>;
+			enable-method = "spin-table";
+			cpu-release-addr = <0>;
+			i-cache-size = <0x8000>;
+			i-cache-line-size = <64>;
+			i-cache-sets = <256>;
+			d-cache-size = <0x8000>;
+			d-cache-line-size = <64>;
+			d-cache-sets = <128>;
+			next-level-cache = <&L2>;
+		};
+	};
+
+	L2: l2-cache {
+		compatible = "cache";
+		cache-unified;
+		cache-level = <2>;
+		cache-size = <0x80000>;
+		cache-line-size = <64>;
+		cache-sets = <512>;
+	};
+
+	timer {
+		compatible = "arm,armv8-timer";
+		interrupts = <GIC_PPI 13 (GIC_CPU_MASK_SIMPLE(4) |
+					  IRQ_TYPE_LEVEL_HIGH)>,
+			     <GIC_PPI 14 (GIC_CPU_MASK_SIMPLE(4) |
+					  IRQ_TYPE_LEVEL_HIGH)>,
+			     <GIC_PPI 11 (GIC_CPU_MASK_SIMPLE(4) |
+					  IRQ_TYPE_LEVEL_HIGH)>,
+			     <GIC_PPI 10 (GIC_CPU_MASK_SIMPLE(4) |
+					  IRQ_TYPE_LEVEL_HIGH)>;
+		always-on;
+	};
+
+	gic: interrupt-controller@f0000000 {
+		compatible = "arm,gic-400";
+		reg = <0x0 0xf0001000 0x0 0x1000>, /* GICD */
+		      <0x0 0xf0002000 0x0 0x2000>; /* GICC */
+
+		      //<0x0 0xf0004000 0x0 0x1000>, /* GICH */
+		      //<0x0 0xf0005000 0x0 0x1000>; /* GICV */
+		interrupts = <GIC_PPI 9	(GIC_CPU_MASK_SIMPLE(4) | IRQ_TYPE_LEVEL_HIGH)>;
+		interrupt-controller;
+		#interrupt-cells = <3>;
+		status = "okay";
+	};
+
+	osc: osc_24m {
+		compatible = "fixed-clock";
+		#clock-cells = <0>;
+		clock-frequency = <24000000>;
+		clock-output-names = "osc";
+		status = "okay";
+	};
+
+	uart0: serial@f1800000 {
+		compatible = "arm,pl011", "arm,primecell";
+		reg = <0x0 0xf1800000 0x0 0x1000>;
+		interrupts = <GIC_SPI 32 IRQ_TYPE_LEVEL_HIGH>;
+		clocks = <&osc>, <&osc>;
+		clock-names = "uartclk", "apb_pclk";
+		status = "okay";
+	};
+
+	sdhci0: sdhci@f1160000 {
+		compatible = "dfd,sdhci";
+		reg = <0x0 0xf1160000 0x0 0x1000>;
+		interrupts = <GIC_SPI 74 IRQ_TYPE_LEVEL_HIGH>;
+		clocks = <&osc>;
+		clock-names = "clk_xin";
+/*		clock-frequency = <40000000>; */
+		/* reset-gpio = TODO */
+		/* io-supply = <&vccio_sdhci0>; */
+		status = "okay";
+	};
+};
