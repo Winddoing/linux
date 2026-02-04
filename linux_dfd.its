@@ -1,0 +1,49 @@
+/dts-v1/;
+
+/ {
+	description = "Linux ITS";
+	#address-cells = <1>;
+	images {
+		kernel {
+			description = "Kernel";
+			data = /incbin/("arch/arm64/boot/Image.lzma");
+			type = "kernel";
+			arch = "arm64";
+			os = "linux";
+			compression = "lzma";
+/*
+			Alignment 2MB is required in "arch/arm64/include/asm/boot.h"
+*/
+			load = <0x00800000>;
+			entry = <0x00800000>;
+		};
+		fdt {
+			description = "Kernel device tree blob";
+			data = /incbin/("arch/arm64/boot/dts/dfd/dfd.dtb");
+			type = "flat_dt";
+			arch = "arm64";
+			compression = "none";
+			load = <0x00700000>;
+		};
+		ramdisk {
+			description = "Rootfs";
+			data = /incbin/("../buildroot/output/images/rootfs.cpio.lzma");
+			type = "ramdisk";
+			arch = "arm64";
+			os = "linux";
+			load = <0x02000000>;
+			entry = <0x02000000>;
+		};
+	};
+
+	configurations {
+		default = "conf";
+		conf {
+			description = "Linux kernel with dtb blob";
+			kernel = "kernel";
+			fdt = "fdt";
+			ramdisk = "ramdisk";
+		};
+	};
+};
+

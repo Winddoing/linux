@@ -462,4 +462,8 @@ config ARCH_ZYNQMP
 	help
 	  This enables support for Xilinx ZynqMP Family
 
+config ARCH_DFD
+	bool "DFD Qemu"
+	help
+	  DFD Qemu test ARMv8
 endmenu # "Platform selection"
