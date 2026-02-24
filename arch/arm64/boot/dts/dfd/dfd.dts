@@ -173,14 +173,12 @@
 	};
 
 	sdhci0: sdhci@f1160000 {
-		compatible = "dfd,sdhci";
+		compatible = "snps,dwcmshc-sdhci";
 		reg = <0x0 0xf1160000 0x0 0x1000>;
 		interrupts = <GIC_SPI 74 IRQ_TYPE_LEVEL_HIGH>;
-		clocks = <&osc>;
-		clock-names = "clk_xin";
-/*		clock-frequency = <40000000>; */
-		/* reset-gpio = TODO */
-		/* io-supply = <&vccio_sdhci0>; */
+		clocks = <&osc>, <&osc>;
+		clock-names = "core", "bus";
+		bus-width = <4>;
 		status = "okay";
 	};
 };
