@@ -105,6 +105,13 @@ config PCIE_ESWIN
 	  The PCIe controller in ESWIN SoCs is based on DesignWare hardware, and
 	  works only in host mode.
 
+config PCIE_DFD
+	tristate "Dfd DWC PCIe controller"
+	depends on PCI_MSI
+	select PCIE_DW_HOST
+	help
+	  dfd platform
+
 config PCI_IMX6
 	bool
 
