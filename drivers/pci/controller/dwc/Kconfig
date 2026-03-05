@@ -93,6 +93,13 @@ config PCIE_BT1
 	  Enables support for the PCIe controller in the Baikal-T1 SoC to work
 	  in host mode. It's based on the Synopsys DWC PCIe v4.60a IP-core.
 
+config PCIE_DFD
+	tristate "Dfd DWC PCIe controller"
+	depends on PCI_MSI
+	select PCIE_DW_HOST
+	help
+	  dfd platform
+
 config PCI_IMX6
 	bool
 

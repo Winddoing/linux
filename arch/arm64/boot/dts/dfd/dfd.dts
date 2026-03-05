@@ -181,4 +181,36 @@
 		bus-width = <4>;
 		status = "okay";
 	};
+
+	pcie_rc: pcie@f7000000 {
+		compatible = "dfd,dw-pcie";
+		reg = <0x00 0xF4000000 0x0 0x100000>,
+		      <0x00 0xF7000000 0x0 0x1000>;
+		reg-names = "config", "dbi";
+		device_type = "pci";
+
+		#address-cells = <3>;
+		#size-cells = <2>;
+		bus-range = <0x0 0xff>;
+		ranges = <0x01000000 0x00 0x00000000 0x00 0xF5000000 0x0 0x00010000     /* IO memory 64KB */
+			  0x02000000 0x00 0x00010000 0x00 0xF5010000 0x0 0x01FF0000     /* 32bit non-prefetchable memory 31MB */
+			  0x43000000 0x00 0x02000000 0x22 0x40000000 0x0 0x40000000>;   /* 64bit prefetchable memory 1GB */
+		/* in bound */
+		dma-ranges = <0x02000000 0x0 0x00000000 0x0 0x00000000 0x0 0x20000000>;
+		max-link-speed = <3>; /* 1: GEN1, 3: GEN3 */
+		num-lanes = <4>;
+
+		interrupt-parent = <&gic>;
+		interrupts = <GIC_SPI 148 IRQ_TYPE_LEVEL_HIGH>;
+		interrupt-names = "msi";
+
+		#interrupt-cells = <1>;
+		interrupt-map-mask = <0 0 0 0x7>;
+		interrupt-map = <0 0 0 1 &gic GIC_SPI 144 IRQ_TYPE_LEVEL_HIGH>,
+				<0 0 0 2 &gic GIC_SPI 145 IRQ_TYPE_LEVEL_HIGH>,
+				<0 0 0 3 &gic GIC_SPI 146 IRQ_TYPE_LEVEL_HIGH>,
+				<0 0 0 4 &gic GIC_SPI 147 IRQ_TYPE_LEVEL_HIGH>;
+		status = "okay";
+	};
+
 };
