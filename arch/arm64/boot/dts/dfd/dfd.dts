@@ -20,7 +20,7 @@
 		* "keep_bootcon"
 		*/
 		//bootargs = "earlycon=pl011,mmio32,0xf1800000 console=ttyAMA0,115200n8 rootwait root=/dev/mmcblk0p2 rootfstype=ext4 rw";
-		bootargs = "earlycon=pl011,mmio32,0xf1800000 console=ttyAMA0,115200n8 rootwait";
+		bootargs = "earlycon=pl011,mmio32,0xf1800000 console=ttyAMA0,115200n8 rootwait root=/dev/mmcblk0p2 rootfstype=ext4 rw";
 		stdout-path = "serial0:115200n8";
 	};
 

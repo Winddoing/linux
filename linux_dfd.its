@@ -25,6 +25,7 @@
 			compression = "none";
 			load = <0x00700000>;
 		};
+/*
 		ramdisk {
 			description = "Rootfs";
 			data = /incbin/("../buildroot/output/images/rootfs.cpio.lzma");
@@ -34,6 +35,7 @@
 			load = <0x02000000>;
 			entry = <0x02000000>;
 		};
+*/
 	};
 
 	configurations {
@@ -42,7 +44,8 @@
 			description = "Linux kernel with dtb blob";
 			kernel = "kernel";
 			fdt = "fdt";
-			ramdisk = "ramdisk";
+/*			ramdisk = "ramdisk"; */
+
 		};
 	};
 };
