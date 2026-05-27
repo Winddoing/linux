@@ -11,6 +11,7 @@
 #include <linux/efi.h>
 #include <linux/memblock.h>
 #include <linux/random.h>
+#include <linux/of_fdt.h>
 #include <asm/dmi.h>
 #include <linux/unaligned.h>
 
@@ -761,6 +762,46 @@ static void __init dmi_scan_machine(void)
 		}
 		dmi_early_unmap(p, 0x10000);
 	}
+
+#ifdef CONFIG_ARCH_DFD
+	else {
+		unsigned long root, chosen;
+		const void *prop;
+		int size;
+		phys_addr_t smbios_addr = 0;
+
+		/*
+		 * Try to locate SMBIOS entry point from device tree first.
+		 * U-Boot may pass the SMBIOS 3.0 entry point address via
+		 * /chosen/smbios3-entrypoint property.
+		 */
+		root = of_get_flat_dt_root();
+		chosen = of_get_flat_dt_subnode_by_name(root, "chosen");
+		if (chosen) {
+			prop = of_get_flat_dt_prop(chosen, "smbios3-entrypoint", &size);
+			if (prop) {
+				if (size == sizeof(__be64))
+					smbios_addr = be64_to_cpup(prop);
+				else if (size == sizeof(__be32))
+					smbios_addr = be32_to_cpup(prop);
+			}
+		}
+
+		if (smbios_addr) {
+			p = dmi_early_remap(smbios_addr, 32);
+			if (p != NULL) {
+				memcpy_fromio(buf, p, 32);
+				dmi_early_unmap(p, 32);
+
+				if (!dmi_smbios3_present(buf)) {
+					dmi_available = 1;
+					return;
+				}
+			}
+		}
+	}
+#endif
+
  error:
 	pr_info("not present or invalid.\n");
 }
