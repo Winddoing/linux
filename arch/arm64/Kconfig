@@ -2555,7 +2555,7 @@ config COMPRESSED_INSTALL
 
 config DMI
 	bool "Enable support for SMBIOS (DMI) tables"
-	depends on EFI
+	depends on EFI || ARCH_DFD
 	default y
 	help
 	  This enables SMBIOS/DMI feature for systems.

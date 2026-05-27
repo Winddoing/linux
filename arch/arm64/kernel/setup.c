@@ -27,6 +27,7 @@
 #include <linux/proc_fs.h>
 #include <linux/memblock.h>
 #include <linux/of_fdt.h>
+#include <linux/dmi.h>
 #include <linux/efi.h>
 #include <linux/psci.h>
 #include <linux/sched/task.h>
@@ -432,3 +433,12 @@ static int __init check_mmu_enabled_at_boot(void)
 	return 0;
 }
 device_initcall_sync(check_mmu_enabled_at_boot);
+
+#if !defined(CONFIG_EFI) && defined(CONFIG_ARCH_DFD)
+static int __init arm64_dfd_dmi_init(void)
+{
+	dmi_setup();
+	return 0;
+}
+core_initcall(arm64_dfd_dmi_init);
+#endif
