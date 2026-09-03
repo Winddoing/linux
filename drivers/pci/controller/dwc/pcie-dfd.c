@@ -27,13 +27,15 @@ struct dfd_pcie_of_data {
 static const struct dw_pcie_host_ops dfd_pcie_host_ops = {
 };
 
-static void dfd_pcie_ep_init(struct dw_pcie_ep *ep)
+static int dfd_pcie_ep_init(struct dw_pcie_ep *ep)
 {
 	struct dw_pcie *pci = to_dw_pcie_from_ep(ep);
 	enum pci_barno bar;
 
 	for (bar = 0; bar < PCI_STD_NUM_BARS; bar++)
 		dw_pcie_ep_reset_bar(pci, bar);
+
+	return 0;
 }
 
 static int dfd_pcie_ep_raise_irq(struct dw_pcie_ep *ep, u8 func_no,
@@ -67,8 +69,8 @@ dfd_pcie_get_features(struct dw_pcie_ep *ep)
 }
 
 static const struct dw_pcie_ep_ops pcie_ep_ops = {
-	.init = dfd_pcie_ep_init,
-	.raise_irq = dfd_pcie_ep_raise_irq,
+	.init         = dfd_pcie_ep_init,
+	.raise_irq    = dfd_pcie_ep_raise_irq,
 	.get_features = dfd_pcie_get_features,
 };
 
