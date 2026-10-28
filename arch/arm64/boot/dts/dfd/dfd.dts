@@ -34,6 +34,17 @@
 		status = "okay";
 	};
 
+	reserved-memory {
+		#address-cells = <2>;
+		#size-cells = <2>;
+		ranges;
+
+		smbios@7FFFF000 {
+			reg = <0x0 0x7FFFF000 0x0 0x1000>;
+			no-map;
+		};
+	};
+
 	cpus {
 		#address-cells = <1>;
 		#size-cells = <0>;
